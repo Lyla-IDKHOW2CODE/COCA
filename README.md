@@ -1,4 +1,4 @@
-帮助本人快速高亮、查询COCA词频，兼学习ai vibe coding的产物
+浏览器插件。帮助本人快速高亮、查询COCA词频，兼学习ai vibe coding的产物
 <br><br>目前的功能：
 <br><br>&emsp;高亮：
 <br>&emsp;&emsp;１.自动高亮COCA Rank 10000到35000的单词
