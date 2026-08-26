@@ -1,15 +1,15 @@
 // ==UserScript==
-// @name         COCA 60000 HIGHLIGHTEN
+// @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.7.1
+// @version      2.7.2
 // @description  双击单词查排名/管理状态，支持手动输入、夜间模式，显示模式切换，分别清空生词本和隐藏
 // @author       You
 // @match        https://*/*
 // @grant        GM_getResourceText
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @downloadURL  https://raw.github.com/Lyla-IDKHOW2CODE/COCA/main/COCA%2060000%20HIGHLIGHTEN.js
-// @updateloadURL  https://raw.github.com/Lyla-IDKHOW2CODE/COCA/main/COCA%2060000%20HIGHLIGHTEN.js
+// @downloadURL  https://raw.github.com/Lyla-IDKHOW2CODE/COCA/main/COCA_60000_HIGHLIGHTEN.js
+// @updateURL  https://raw.github.com/Lyla-IDKHOW2CODE/COCA/main/COCA_60000_HIGHLIGHTEN.js
 // @resource     COCA_DATA https://raw.githubusercontent.com/Lyla-IDKHOW2CODE/COCA/refs/heads/main/COCA60000.json
 // ==/UserScript==
 
