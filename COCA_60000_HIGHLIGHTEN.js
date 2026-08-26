@@ -1,4 +1,6 @@
+
 // ==UserScript==
+
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
 // @version      2.7.2
@@ -11,6 +13,7 @@
 // @downloadURL  https://raw.github.com/Lyla-IDKHOW2CODE/COCA/main/COCA_60000_HIGHLIGHTEN.js
 // @updateURL  https://raw.github.com/Lyla-IDKHOW2CODE/COCA/main/COCA_60000_HIGHLIGHTEN.js
 // @resource     COCA_DATA https://raw.githubusercontent.com/Lyla-IDKHOW2CODE/COCA/refs/heads/main/COCA60000.json
+
 // ==/UserScript==
 
 (async function() {
