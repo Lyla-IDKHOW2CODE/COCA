@@ -8,12 +8,14 @@
 // @grant        GM_getResourceText
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @downloadURL  https://raw.github.com/Lyla-IDKHOW2CODE/COCA/main/COCA%2060000%20HIGHLIGHTEN.js
+// @updateloadURL  https://raw.github.com/Lyla-IDKHOW2CODE/COCA/main/COCA%2060000%20HIGHLIGHTEN.js
 // @resource     COCA_DATA https://raw.githubusercontent.com/Lyla-IDKHOW2CODE/COCA/refs/heads/main/COCA60000.json
 // ==/UserScript==
 
 (async function() {
     'use strict';
-
+    
     // ============================================================
     // 1. 加载 COCA 词库（保留最小排名）
     // ============================================================
@@ -48,29 +50,25 @@
         }
     }
     console.log(`✅ COCA词库加载完成，有效单词数：${COCA_MAP.size}`);
-
+    
     // ============================================================
-    // 2. 用户配置区（按你指定的颜色）
+    // 2. 用户配置区
     // ============================================================
-    const START_RANK = 8000;               // 排名 ≤ 此值的普通单词不高亮
-    const MAX_RANK = 60000;                // 排名 > 此值的普通单词也不高亮（可调低）
+    const START_RANK = 10000;               // 排名 ≤ 此值的普通单词不高亮
+    const MAX_RANK = 35000;                // 排名 > 此值的普通单词也不高亮
     const STORAGE_KEY_LEARNED = 'coca_learned_words';
     const STORAGE_KEY_VOCAB = 'coca_vocab_words';
     const STORAGE_KEY_NIGHTMODE = 'coca_nightmode';
     const STORAGE_KEY_DISPLAY_MODE = 'coca_display_mode';
-
-    // ---- 颜色配置（按你指定的修改） ----
+    // ---- 颜色配置 ----
     const VOCAB_COLOR = '#EDF0C1';          // 生词本统一高亮颜色（淡黄色）
 
     const COLOR_SETTING = [
         { limit: 15000, color: '#E3CECF' },   // 8001~15000 淡粉红
         { limit: 20000, color: '#E1D6E7' },   // 15001~20000 淡紫
         { limit: 35000, color: '#D6E6D7' },   // 20001~35000 淡绿
-        // 35001~60000 不额外设置颜色，保持不高亮（因为没颜色可匹配）
-        // 如果你想 35001~60000 也有颜色，可以加一行：
-        // { limit: 60000, color: '#D4C5A9' }  // 淡棕
     ];
-
+    
     // ============================================================
     // 3. 存储操作
     // ============================================================
