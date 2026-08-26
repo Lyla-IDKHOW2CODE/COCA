@@ -4,7 +4,7 @@
 <br>&emsp;&emsp;１.自动高亮COCA Rank 10000到35000的单词
 <br>&emsp;&emsp;&emsp; 10000-15000（淡红色）
 <br>&emsp;&emsp;&emsp;15000-20000（淡紫色）
-<br>&emsp;&emsp;&emsp;30000-30000（淡绿色）
+<br>&emsp;&emsp;&emsp;20000-35000（淡绿色）
 <br>&emsp;&emsp;２.高亮加入生词本的单词
 <br>&emsp;&emsp;&emsp;（淡黄色）
 <br>&emsp;&emsp;３.取消高亮加入隐藏的单词
