@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA 60000 HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.7
+// @version      2.7.1
 // @description  双击单词查排名/管理状态，支持手动输入、夜间模式，显示模式切换，分别清空生词本和隐藏
 // @author       You
 // @match        https://*/*
