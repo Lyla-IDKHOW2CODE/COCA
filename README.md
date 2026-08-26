@@ -9,7 +9,7 @@
 <br>&emsp;&emsp;&emsp;（淡黄色）
 <br>&emsp;&emsp;３.取消高亮加入隐藏的单词
 <br>&emsp;查词频：
-<br>&emsp;&emsp;１.光标移至高亮单词自动显示具体COCA Rank
+<br>&emsp;&emsp;１.光标移至高亮单词自动显示具体COCA Rank（1-60000）
 <br>&emsp;&emsp;２.双击任意单词显示词频和快捷管理，加入生词本或隐藏
 <br>&emsp;高亮模式：
 <br>&emsp;&emsp;１.全部高亮
