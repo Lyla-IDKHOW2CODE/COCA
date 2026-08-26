@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.7
-// @description  双击单词查排名/管理状态，支持手动输入、夜间模式，显示模式切换，分别清空生词本和隐藏
-// @author       You
+// @version      1.0
+// @description  result of vibe coding and author literally don't know how to code, blame deepseek.
+// @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
 // @grant        GM_getResourceText
 // @grant        GM_setValue
