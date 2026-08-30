@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      1.0
+// @version      2.0
 // @description  result of vibe coding and author literally don't know how to code, blame deepseek.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
@@ -13,6 +13,35 @@
 
 (async function() {
     'use strict';
+
+    // ============================================================
+    // 0. 词干提取（用于匹配变形词）
+    // ============================================================
+    function getStem(word) {
+        const w = word.toLowerCase();
+        // 特殊情况：以 'ies' 结尾 -> 'y' (如 berries -> berry)
+        if (w.endsWith('ies') && w.length > 3) {
+            return w.slice(0, -3) + 'y';
+        }
+        // 以 'es' 结尾，且不是 'ss'、'x'、'ch'、'sh' 等 (简单处理)
+        if (w.endsWith('es') && w.length > 2) {
+            return w.slice(0, -2);
+        }
+        // 以 's' 结尾，且不是 'ss'，去掉 's' (如 qualms -> qualm)
+        if (w.endsWith('s') && !w.endsWith('ss') && w.length > 1) {
+            return w.slice(0, -1);
+        }
+        // 以 'ing' 结尾 (如 running -> run)
+        if (w.endsWith('ing') && w.length > 4) {
+            return w.slice(0, -3);
+        }
+        // 以 'ed' 结尾 (如 played -> play)
+        if (w.endsWith('ed') && w.length > 3) {
+            return w.slice(0, -2);
+        }
+        // 其他情况返回原词
+        return w;
+    }
 
     // ============================================================
     // 1. 加载 COCA 词库（保留最小排名）
@@ -131,7 +160,13 @@
         return false;
     }
     function isLearned(word) {
-        return getLearnedWords().includes(word.toLowerCase().trim());
+        const clean = word.toLowerCase().trim();
+        const list = getLearnedWords();
+        if (list.includes(clean)) return true;
+        // 尝试词干匹配
+        const stem = getStem(clean);
+        if (stem !== clean && list.includes(stem)) return true;
+        return false;
     }
 
     function addVocab(word) {
@@ -156,7 +191,12 @@
         return false;
     }
     function isVocab(word) {
-        return getVocabWords().includes(word.toLowerCase().trim());
+        const clean = word.toLowerCase().trim();
+        const list = getVocabWords();
+        if (list.includes(clean)) return true;
+        const stem = getStem(clean);
+        if (stem !== clean && list.includes(stem)) return true;
+        return false;
     }
 
     function clearLearned() {
@@ -206,7 +246,7 @@
     }
 
     // ============================================================
-    // 5. 管理面板
+    // 5. 管理面板（略，原样保留，未改动）
     // ============================================================
     let panelRemove = () => {};
 
@@ -609,7 +649,7 @@
     }
 
     // ============================================================
-    // 7. 高亮核心逻辑（支持显示模式切换）
+    // 7. 高亮核心逻辑（支持显示模式切换 + 词干匹配）
     // ============================================================
     function 获取颜色(word) {
         const clean = word.toLowerCase().trim();
@@ -620,7 +660,13 @@
         }
 
         if (isVocab(clean)) {
-            return { color: VOCAB_COLOR, rank: COCA_MAP.get(clean) || '?' };
+            // 如果是生词本单词，返回生词颜色，排名尝试取原词或词干
+            let rank = COCA_MAP.get(clean);
+            if (!rank) {
+                const stem = getStem(clean);
+                if (stem !== clean) rank = COCA_MAP.get(stem);
+            }
+            return { color: VOCAB_COLOR, rank: rank || '?' };
         }
 
         if (displayMode === 'vocab_only') {
@@ -630,7 +676,13 @@
         if (isLearned(clean)) {
             return null;
         }
-        const rank = COCA_MAP.get(clean);
+
+        // 查询COCA排名，先查原词，再查词干
+        let rank = COCA_MAP.get(clean);
+        if (!rank) {
+            const stem = getStem(clean);
+            if (stem !== clean) rank = COCA_MAP.get(stem);
+        }
         if (!rank) return null;
         if (rank <= START_RANK) return null;
         if (rank > MAX_RANK) return null;
@@ -695,7 +747,7 @@
     }
 
     // ============================================================
-    // 9. 双击弹窗
+    // 9. 双击弹窗（稍作优化，显示词干信息）
     // ============================================================
     function showWordDialog(word, rank, currentState) {
         const old = document.getElementById('coca-dialog');
@@ -833,8 +885,12 @@
         const rawWord = match[0];
         const clean = rawWord.toLowerCase().trim();
 
-        const rank = COCA_MAP.get(clean);
-        const rankDisplay = rank || null;
+        // 尝试获取排名（原词或词干）
+        let rank = COCA_MAP.get(clean);
+        if (!rank) {
+            const stem = getStem(clean);
+            if (stem !== clean) rank = COCA_MAP.get(stem);
+        }
 
         let state = '';
         if (isVocab(clean)) state = '生词';
@@ -849,7 +905,7 @@
             state = '未高亮';
         }
 
-        showWordDialog(rawWord, rankDisplay, state);
+        showWordDialog(rawWord, rank || null, state);
     });
 
     // ============================================================
@@ -865,7 +921,7 @@
         addFloatingButton();
     }
 
-    console.log('📌 COCA 高亮 + 单词状态管理器 v2.7 已启动！');
+    console.log('📌 COCA 高亮 + 单词状态管理器 v2.8 (带词干匹配) 已启动！');
     console.log('   ⚙️ 点击右下角齿轮按钮打开管理面板');
     console.log('   💡 双击任意英文单词 → 查看排名并管理状态');
     console.log('   ⭐ 生词本单词强制高亮（颜色可自定义）');
@@ -873,5 +929,6 @@
     console.log('   🌙 夜间模式切换（背景色 ↔ 下划线）');
     console.log('   📺 显示模式切换（全部 / 仅生词本 / 关闭高亮）');
     console.log('   🗑️ 分别清空生词本和隐藏列表');
+    console.log('   🔄 支持词干匹配：qualms → qualm 自动高亮');
 
 })();
