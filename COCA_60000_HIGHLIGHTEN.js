@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.2.1
+// @version      2.2.2
 // @description  result of vibe coding and author literally don't know how to code, blame deepseek.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
@@ -88,7 +88,10 @@
         if (w.endsWith('ed') && w.length > 3) {
             return w.slice(0, -2);
         }
-
+        // 13. 直接+d
+        if (w.endsWith('d') && w.length > 2) {
+            return w.slice(0, -1);
+        }
         // 其他情况返回原词
         return w;
     }
