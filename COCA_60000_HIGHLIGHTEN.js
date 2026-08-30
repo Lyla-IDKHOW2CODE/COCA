@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.0.1
+// @version      2.1
 // @description  result of vibe coding and author literally don't know how to code, blame deepseek.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
