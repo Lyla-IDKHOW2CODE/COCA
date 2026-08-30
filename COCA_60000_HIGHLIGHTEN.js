@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.3
-// @description  result of vibe coding and author literally don't know how to code, blame deepseek.
+// @version      2.4
+// @description  result of vibe coding and author literally don't know how to code, blame deepseek and chatGPT.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
 // @grant        GM_getResourceText
@@ -954,41 +954,91 @@
         });
     }
 
-    // ============================================================
-    // 10. 双击事件处理
-    // ============================================================
-    document.addEventListener('dblclick', function(e) {
-        const selection = window.getSelection();
-        const selected = selection.toString().trim();
-        if (!selected) return;
-        const match = selected.match(/[a-zA-Z']+/);
-        if (!match) return;
-        const rawWord = match[0];
-        const clean = rawWord.toLowerCase().trim();
+// ============================================================
+// 10. 双击事件处理（修正版：统一词干rank逻辑）
+// ============================================================
+document.addEventListener('dblclick', function(e) {
+    const selection = window.getSelection();
+    const selected = selection.toString().trim();
 
-        // 尝试获取排名（原词或词干）
-        let rank = COCA_MAP.get(clean);
-        if (!rank) {
-            const stem = getStem(clean);
-            if (stem !== clean) rank = COCA_MAP.get(stem);
-        }
+    if (!selected) return;
 
-        let state = '';
-        if (isVocab(clean)) state = '生词';
-        else if (isLearned(clean)) state = '隐藏';
-        else if (rank && rank > START_RANK) {
-            let inRange = false;
-            for (let rule of COLOR_SETTING) {
-                if (rank <= rule.limit) { inRange = true; break; }
+    const match = selected.match(/[a-zA-Z']+/);
+    if (!match) return;
+
+    const rawWord = match[0];
+    const clean = rawWord.toLowerCase().trim();
+
+    // ====================================================
+    // 和 获取颜色() 保持完全一致的 rank 判断
+    // 优先使用词干排名
+    // ====================================================
+
+    let rankOrig = COCA_MAP.get(clean);
+    let rankStem = null;
+
+    const stem = getStem(clean);
+
+    if (stem !== clean) {
+        rankStem = COCA_MAP.get(stem);
+    }
+
+    if (!rankStem && clean.endsWith('ed') && stem !== clean) {
+        rankStem = COCA_MAP.get(stem + 'e');
+    }
+
+
+    let rank = null;
+
+    if (rankStem !== undefined && rankStem !== null) {
+        rank = rankStem;
+    } else if (rankOrig !== undefined) {
+        rank = rankOrig;
+    }
+
+
+    let state = '';
+
+    // 生词本最高优先级
+    if (isVocab(clean)) {
+
+        state = '生词';
+
+    }
+
+    // 隐藏第二优先级
+    else if (isLearned(clean)) {
+
+        state = '隐藏';
+
+    }
+
+    // 普通高亮判断
+    else if (rank !== null && rank > START_RANK) {
+
+        let inRange = false;
+
+        for (let rule of COLOR_SETTING) {
+            if (rank <= rule.limit) {
+                inRange = true;
+                break;
             }
-            state = inRange ? '普通高亮' : '未高亮';
-        } else {
-            state = '未高亮';
         }
 
-        showWordDialog(rawWord, rank || null, state);
-    });
+        state = inRange ? '普通高亮' : '未高亮';
 
+    }
+
+    else {
+
+        state = '未高亮';
+
+    }
+
+
+    showWordDialog(rawWord, rank || null, state);
+
+});
     // ============================================================
     // 11. 启动脚本
     // ============================================================
