@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.2.3
+// @version      2.3
 // @description  result of vibe coding and author literally don't know how to code, blame deepseek.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
@@ -212,12 +212,14 @@
         const clean = word.toLowerCase().trim();
         const list = getLearnedWords();
         if (list.includes(clean)) return true;
-        // 尝试词干匹配
         const stem = getStem(clean);
         if (stem !== clean && list.includes(stem)) return true;
+        if (clean.endsWith('ed') && stem !== clean) {
+            const extended = stem + 'e';
+            if (list.includes(extended)) return true;
+        }
         return false;
     }
-
     function addVocab(word) {
         const list = getVocabWords();
         const clean = word.toLowerCase().trim();
@@ -239,15 +241,21 @@
         }
         return false;
     }
-    function isVocab(word) {
+       function isVocab(word) {
         const clean = word.toLowerCase().trim();
         const list = getVocabWords();
+        // 原词匹配
         if (list.includes(clean)) return true;
+        // 词干匹配
         const stem = getStem(clean);
         if (stem !== clean && list.includes(stem)) return true;
+        // ed 结尾补 e 匹配
+        if (clean.endsWith('ed') && stem !== clean) {
+            const extended = stem + 'e';
+            if (list.includes(extended)) return true;
+        }
         return false;
     }
-
     function clearLearned() {
         saveLearnedWords([]);
     }
@@ -700,7 +708,7 @@
     // ============================================================
     // 7. 高亮核心逻辑（支持显示模式切换 + 词干匹配）
     // ============================================================
-       function 获取颜色(word) {
+    function 获取颜色(word) {
         const clean = word.toLowerCase().trim();
         const displayMode = getDisplayMode();
 
@@ -708,12 +716,16 @@
             return null;
         }
 
-        // 1. 先检查是否在生词本（生词本使用词干匹配，已有逻辑，无需改动）
+        // ---- 生词本检查（保留原有逻辑，但也要支持补 e） ----
         if (isVocab(clean)) {
-            // 获取排名：优先用词干的排名，再用原词
             let rank = null;
             const stem = getStem(clean);
+            // 尝试词干排名
             if (stem !== clean) rank = COCA_MAP.get(stem);
+            // 如果词干没有，且是 ed 结尾，尝试补 e
+            if (!rank && clean.endsWith('ed') && stem !== clean) {
+                rank = COCA_MAP.get(stem + 'e');
+            }
             if (!rank) rank = COCA_MAP.get(clean);
             return { color: VOCAB_COLOR, rank: rank || '?' };
         }
@@ -722,28 +734,43 @@
             return null;
         }
 
-        // 2. 检查是否在隐藏列表（隐藏列表使用词干匹配，已有逻辑，无需改动）
+        // ---- 隐藏列表检查（同样支持补 e） ----
         if (isLearned(clean)) {
             return null;
         }
 
-        // 3. 普通高亮：**优先使用词干的排名**
+        // ---- 普通高亮逻辑 ----
         const stem = getStem(clean);
-        let rank = null;
-        // 先查词干
+        let rankOrig = COCA_MAP.get(clean);
+        let rankStem = null;
+
+        // 获取词干排名（如果词干不同）
         if (stem !== clean) {
-            rank = COCA_MAP.get(stem);
+            rankStem = COCA_MAP.get(stem);
         }
-        // 如果词干没有，再查原词
-        if (!rank) {
-            rank = COCA_MAP.get(clean);
+        // 如果词干没有排名，且是 ed 结尾，尝试补 e 后的词干
+        if (!rankStem && clean.endsWith('ed') && stem !== clean) {
+            rankStem = COCA_MAP.get(stem + 'e');
         }
-        if (!rank) return null;
-        if (rank <= START_RANK) return null;
-        if (rank > MAX_RANK) return null;
+
+        // 判断：任一 <= START_RANK 则不高亮
+        if (rankOrig !== undefined && rankOrig <= START_RANK) return null;
+        if (rankStem !== undefined && rankStem <= START_RANK) return null;
+
+        // 使用词干排名（优先），否则使用原词排名
+        let finalRank = null;
+        if (rankStem !== undefined && rankStem > START_RANK && rankStem <= MAX_RANK) {
+            finalRank = rankStem;
+        } else if (rankOrig !== undefined && rankOrig > START_RANK && rankOrig <= MAX_RANK) {
+            finalRank = rankOrig;
+        } else {
+            return null;
+        }
+
+        // 根据 finalRank 确定颜色
         for (let rule of COLOR_SETTING) {
-            if (rank <= rule.limit) {
-                return { color: rule.color, rank: rank };
+            if (finalRank <= rule.limit) {
+                return { color: rule.color, rank: finalRank };
             }
         }
         return null;
