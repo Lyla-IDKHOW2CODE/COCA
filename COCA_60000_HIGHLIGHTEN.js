@@ -17,28 +17,45 @@
     // ============================================================
     // 0. 词干提取（用于匹配变形词）
     // ============================================================
+        // ============================================================
+    // 0. 词干提取（用于匹配变形词）
+    // ============================================================
     function getStem(word) {
         const w = word.toLowerCase();
-        // 特殊情况：以 'ies' 结尾 -> 'y' (如 berries -> berry)
+
+        // ---- 处理副词后缀 ----
+        // 1. 以 'ily' 结尾 -> 替换为 'y' (如 happily -> happy, angrily -> angry)
+        //    注意：这个必须放在 'ly' 规则之前，因为 'ily' 也以 'ly' 结尾
+        if (w.endsWith('ily') && w.length > 3) {
+            return w.slice(0, -3) + 'y';
+        }
+        // 2. 以 'ly' 结尾 -> 直接去掉 'ly' (如 quickly -> quick, slowly -> slow)
+        if (w.endsWith('ly') && w.length > 2) {
+            return w.slice(0, -2);
+        }
+
+        // ---- 处理名词/动词变形 ----
+        // 3. 以 'ies' 结尾 -> 替换为 'y' (如 berries -> berry)
         if (w.endsWith('ies') && w.length > 3) {
             return w.slice(0, -3) + 'y';
         }
-        // 以 'es' 结尾，且不是 'ss'、'x'、'ch'、'sh' 等 (简单处理)
+        // 4. 以 'es' 结尾 -> 去掉 'es' (如 boxes -> box)
         if (w.endsWith('es') && w.length > 2) {
             return w.slice(0, -2);
         }
-        // 以 's' 结尾，且不是 'ss'，去掉 's' (如 qualms -> qualm)
+        // 5. 以 's' 结尾，但不是 'ss' -> 去掉 's' (如 qualms -> qualm)
         if (w.endsWith('s') && !w.endsWith('ss') && w.length > 1) {
             return w.slice(0, -1);
         }
-        // 以 'ing' 结尾 (如 running -> run)
+        // 6. 以 'ing' 结尾 -> 去掉 'ing' (如 running -> run)
         if (w.endsWith('ing') && w.length > 4) {
             return w.slice(0, -3);
         }
-        // 以 'ed' 结尾 (如 played -> play)
+        // 7. 以 'ed' 结尾 -> 去掉 'ed' (如 played -> play)
         if (w.endsWith('ed') && w.length > 3) {
             return w.slice(0, -2);
         }
+
         // 其他情况返回原词
         return w;
     }
