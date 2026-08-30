@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.1
+// @version      2.2
 // @description  result of vibe coding and author literally don't know how to code, blame deepseek.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
@@ -13,45 +13,75 @@
 
 (async function() {
     'use strict';
-
-    // ============================================================
-    // 0. 词干提取（用于匹配变形词）
-    // ============================================================
-        // ============================================================
-    // 0. 词干提取（用于匹配变形词）
+            
+     // ============================================================
+    // 0. 词干提取（升级版：处理名词、形容词后缀）
     // ============================================================
     function getStem(word) {
         const w = word.toLowerCase();
 
-        // ---- 处理副词后缀 ----
-        // 1. 以 'ily' 结尾 -> 替换为 'y' (如 happily -> happy, angrily -> angry)
-        //    注意：这个必须放在 'ly' 规则之前，因为 'ily' 也以 'ly' 结尾
+        // ---- 第一优先级：最长后缀优先匹配（防止误伤） ----
+
+        // 1. 处理副词：ily -> y (happily -> happy)
         if (w.endsWith('ily') && w.length > 3) {
             return w.slice(0, -3) + 'y';
         }
-        // 2. 以 'ly' 结尾 -> 直接去掉 'ly' (如 quickly -> quick, slowly -> slow)
-        if (w.endsWith('ly') && w.length > 2) {
-            return w.slice(0, -2);
+
+        // 2. 处理名词：iness -> y (happiness -> happy) 
+        //    这个必须放在 ness 之前，因为 happiness 也以 ness 结尾
+        if (w.endsWith('iness') && w.length > 5) {
+            return w.slice(0, -5) + 'y';
         }
 
-        // ---- 处理名词/动词变形 ----
-        // 3. 以 'ies' 结尾 -> 替换为 'y' (如 berries -> berry)
+        // 3. 处理副词：ly -> '' (quickly -> quick)
+        if (w.endsWith('ly') && w.length > 2) {
+            return w.slice(0, -2);
+        }                    
+
+        // 4. 处理名词复数：ies -> y (berries -> berry)
         if (w.endsWith('ies') && w.length > 3) {
             return w.slice(0, -3) + 'y';
         }
-        // 4. 以 'es' 结尾 -> 去掉 'es' (如 boxes -> box)
+
+        // 5. 处理抽象名词：ness -> '' (darkness -> dark,  kindness -> kind)
+        if (w.endsWith('ness') && w.length > 4) {
+            return w.slice(0, -4);
+        }
+
+        // 6. 处理形容词：less -> '' (homeless -> home)
+        if (w.endsWith('less') && w.length > 4) {
+            return w.slice(0, -4);
+        }
+
+        // 7. 处理形容词：ful -> '' (helpful -> help,  beautiful -> beauti? 
+        //    但 beauti 不存在，不过这样至少能让它不高亮，或者继续往下走)
+        if (w.endsWith('ful') && w.length > 3) {
+            return w.slice(0, -3);
+        }
+
+        // 8. 处理名词：ment -> '' (payment -> pay,  enjoyment -> enjoy)
+        if (w.endsWith('ment') && w.length > 4) {
+            return w.slice(0, -4);
+        }
+
+        // ---- 第二优先级：动词/名词基础变形 ----
+
+        // 9. 处理 es (boxes -> box)
         if (w.endsWith('es') && w.length > 2) {
             return w.slice(0, -2);
         }
-        // 5. 以 's' 结尾，但不是 'ss' -> 去掉 's' (如 qualms -> qualm)
+
+        // 10. 处理复数 s (qualms -> qualm)
         if (w.endsWith('s') && !w.endsWith('ss') && w.length > 1) {
             return w.slice(0, -1);
         }
-        // 6. 以 'ing' 结尾 -> 去掉 'ing' (如 running -> run)
+
+        // 11. 处理进行时 ing (running -> run,  happening -> happen)
         if (w.endsWith('ing') && w.length > 4) {
             return w.slice(0, -3);
         }
-        // 7. 以 'ed' 结尾 -> 去掉 'ed' (如 played -> play)
+
+        // 12. 处理过去式 ed (played -> play,  happened -> happen)
         if (w.endsWith('ed') && w.length > 3) {
             return w.slice(0, -2);
         }
@@ -668,7 +698,7 @@
     // ============================================================
     // 7. 高亮核心逻辑（支持显示模式切换 + 词干匹配）
     // ============================================================
-    function 获取颜色(word) {
+       function 获取颜色(word) {
         const clean = word.toLowerCase().trim();
         const displayMode = getDisplayMode();
 
@@ -676,13 +706,13 @@
             return null;
         }
 
+        // 1. 先检查是否在生词本（生词本使用词干匹配，已有逻辑，无需改动）
         if (isVocab(clean)) {
-            // 如果是生词本单词，返回生词颜色，排名尝试取原词或词干
-            let rank = COCA_MAP.get(clean);
-            if (!rank) {
-                const stem = getStem(clean);
-                if (stem !== clean) rank = COCA_MAP.get(stem);
-            }
+            // 获取排名：优先用词干的排名，再用原词
+            let rank = null;
+            const stem = getStem(clean);
+            if (stem !== clean) rank = COCA_MAP.get(stem);
+            if (!rank) rank = COCA_MAP.get(clean);
             return { color: VOCAB_COLOR, rank: rank || '?' };
         }
 
@@ -690,15 +720,21 @@
             return null;
         }
 
+        // 2. 检查是否在隐藏列表（隐藏列表使用词干匹配，已有逻辑，无需改动）
         if (isLearned(clean)) {
             return null;
         }
 
-        // 查询COCA排名，先查原词，再查词干
-        let rank = COCA_MAP.get(clean);
+        // 3. 普通高亮：**优先使用词干的排名**
+        const stem = getStem(clean);
+        let rank = null;
+        // 先查词干
+        if (stem !== clean) {
+            rank = COCA_MAP.get(stem);
+        }
+        // 如果词干没有，再查原词
         if (!rank) {
-            const stem = getStem(clean);
-            if (stem !== clean) rank = COCA_MAP.get(stem);
+            rank = COCA_MAP.get(clean);
         }
         if (!rank) return null;
         if (rank <= START_RANK) return null;
@@ -710,7 +746,6 @@
         }
         return null;
     }
-
     // ============================================================
     // 8. 清除高亮 & 高亮页面
     // ============================================================
