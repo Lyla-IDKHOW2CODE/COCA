@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.4.３
+// @version      2.4.3
 // @description  菜单面板适配移动端result of vibe coding and author literally don't know how to code, blame deepseek and chatGPT.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
