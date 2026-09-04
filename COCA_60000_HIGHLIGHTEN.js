@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.4.2
-// @description  result of vibe coding and author literally don't know how to code, blame deepseek and chatGPT.
+// @version      2.4.３
+// @description  菜单面板适配移动端result of vibe coding and author literally don't know how to code, blame deepseek and chatGPT.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
 // @grant        GM_getResourceText
@@ -306,6 +306,64 @@
     // ============================================================
     // 5. 管理面板（略，原样保留，未改动）
     // ============================================================
+    // ============================================================
+// UI现代化样式
+// ============================================================
+function addModernUIStyle() {
+    const style = document.createElement('style');
+    style.textContent = `
+    #coca-panel {
+        width: min(400px, 90vw) !important;
+        max-height: 80vh !important;
+        box-sizing: border-box !important;
+        background: #1e1e1e !important;
+        border: 1px solid #444 !important;
+        border-radius: 12px !important;
+        box-shadow: none !important;
+        padding: 14px !important;
+    }
+
+    #coca-panel button {
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        transition: background 0.15s, opacity 0.15s;
+    }
+
+    #coca-panel button:hover {
+        opacity: 0.85;
+    }
+
+    #coca-panel input {
+        border-radius: 8px !important;
+        border:1px solid #555 !important;
+        outline:none;
+    }
+
+    #coca-panel input:focus {
+        border-color:#888 !important;
+    }
+
+    #coca-panel div {
+        scrollbar-width: thin;
+    }
+
+    @media(max-width:600px){
+        #coca-panel {
+            right:5vw !important;
+            bottom:70px !important;
+            width:90vw !important;
+            max-height:75vh !important;
+        }
+
+        #coca-panel button {
+            font-size:12px !important;
+            padding:6px 8px !important;
+        }
+    }
+    `;
+
+    document.head.appendChild(style);
+}
     let panelRemove = () => {};
 
     function showManagementPanel() {
@@ -678,23 +736,22 @@
         btn.id = 'coca-fab';
         btn.textContent = '⚙️';
         btn.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 48px;
-            height: 48px;
-            background: rgba(52, 152, 219, 0.85);
-            color: white;
-            border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            font-size: 24px;
-            line-height: 48px;
-            text-align: center;
-            cursor: pointer;
-            z-index: 999998;
-            user-select: none;
-            transition: transform 0.2s;
-            border: 1px solid rgba(255,255,255,0.2);
+        position:fixed;
+        right:16px;
+        bottom:30px;
+        width:44px;
+        height:44px;
+        background:#2f80ed;
+        color:white;
+        border-radius:50%;
+        font-size:20px;
+        line-height:44px;
+        text-align:center;
+        cursor:pointer;
+        z-index:999998;
+        user-select:none;
+        border:none;
+        box-shadow:none;
         `;
         btn.title = '打开单词状态管理';
         btn.onmouseenter = () => { btn.style.transform = 'scale(1.1)'; };
@@ -1060,15 +1117,17 @@ document.addEventListener('dblclick', function(e) {
     // ============================================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
+            addModernUIStyle();
             高亮页面();
             addFloatingButton();
         });
     } else {
+        addModernUIStyle();
         高亮页面();
         addFloatingButton();
     }
 
-    console.log('📌 COCA 高亮 + 单词状态管理器 v2.4.2 已启动！');
+    console.log('📌 COCA 高亮 + 单词状态管理器 v2.4.3 已启动！');
     console.log('   ⚙️ 点击右下角齿轮按钮打开管理面板');
     console.log('   💡 双击任意英文单词 → 查看排名并管理状态');
     console.log('   ⭐ 生词本单词强制高亮（颜色可自定义）');
