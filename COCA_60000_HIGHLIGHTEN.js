@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.4.1
+// @version      2.4.2
 // @description  result of vibe coding and author literally don't know how to code, blame deepseek and chatGPT.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
@@ -126,6 +126,7 @@
         }
     }
     console.log(`✅ COCA词库加载完成，有效单词数：${COCA_MAP.size}`);
+    console.log("测试willpower:", COCA_MAP.get("willpower"));
 
     // ============================================================
     // 2. 用户配置区
@@ -709,24 +710,27 @@
     // 7. 高亮核心逻辑（支持显示模式切换 + 词干匹配）
     // ============================================================
     function 获取颜色(word) {
+        console.log("进入获取颜色:", word);
         const clean = word.toLowerCase().trim();
         const displayMode = getDisplayMode();
 
         if (displayMode === 'none') {
+            console.log("因为displayMode none跳过", clean);
             return null;
         }
-
         // ---- 生词本检查（保留原有逻辑，但也要支持补 e） ----
         if (isVocab(clean)) {
+            console.log("进入生词本判断:", clean);
             let rank = null;
             const stem = getStem(clean);
-            // 尝试词干排名
+             // 尝试词干排名
             if (stem !== clean) rank = COCA_MAP.get(stem);
             // 如果词干没有，且是 ed 结尾，尝试补 e
             if (!rank && clean.endsWith('ed') && stem !== clean) {
                 rank = COCA_MAP.get(stem + 'e');
             }
             if (!rank) rank = COCA_MAP.get(clean);
+            console.log("生词本返回:", clean, rank);
             return { color: VOCAB_COLOR, rank: rank || '?' };
         }
 
@@ -736,6 +740,7 @@
 
         // ---- 隐藏列表检查（同样支持补 e） ----
         if (isLearned(clean)) {
+            console.log("进入隐藏列表", clean);
             return null;
         }
 
@@ -743,6 +748,16 @@
         const stem = getStem(clean);
         let rankOrig = COCA_MAP.get(clean);
         let rankStem = null;
+        console.log(
+    "排名检查:",
+    clean,
+    "词干:",
+    stem,
+    "原词排名:",
+    rankOrig,
+    "词干排名:",
+    rankStem
+);
 
         // 获取词干排名（如果词干不同）
         if (stem !== clean) {
@@ -755,7 +770,7 @@
 
         // 判断：任一 <= START_RANK 则不高亮
         if (rankOrig !== undefined && rankOrig <= START_RANK) return null;
-        if (rankStem !== undefined && rankStem <= START_RANK) return null;
+        if (rankStem != null && rankStem <= START_RANK) return null;
 
         // 使用词干排名（优先），否则使用原词排名
         let finalRank = null;
@@ -786,6 +801,7 @@
     }
 
     function 高亮页面() {
+        console.log("进入高亮页面函数");
         清除高亮();
         const isNight = getNightMode();
         const walker = document.createTreeWalker(
@@ -808,6 +824,7 @@
             const original = textNode.textContent;
             const newHTML = original.replace(/\b([a-zA-Z']+)\b/g, function(match) {
                 const result = 获取颜色(match);
+                console.log("检查单词:", match, result);
                 if (!result) return match;
                 const { color, rank } = result;
                 const tooltip = rank !== '?' ? `COCA排名: ${rank}` : '生词本单词';
@@ -1013,7 +1030,7 @@ document.addEventListener('dblclick', function(e) {
     }
 
     // 普通高亮判断
-    else if (rank !== null && rank > START_RANK) {
+   else if (rank !== null && rank > START_RANK && rank <= MAX_RANK) {
 
         let inRange = false;
 
@@ -1051,7 +1068,7 @@ document.addEventListener('dblclick', function(e) {
         addFloatingButton();
     }
 
-    console.log('📌 COCA 高亮 + 单词状态管理器 v2.8 (带词干匹配) 已启动！');
+    console.log('📌 COCA 高亮 + 单词状态管理器 v2.4.2 已启动！');
     console.log('   ⚙️ 点击右下角齿轮按钮打开管理面板');
     console.log('   💡 双击任意英文单词 → 查看排名并管理状态');
     console.log('   ⭐ 生词本单词强制高亮（颜色可自定义）');
