@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         COCA_60000_HIGHLIGHTEN
 // @namespace    https://github.com/Lyla-IDKHOW2CODE/COCA
-// @version      2.4
+// @version      2.4.1
 // @description  result of vibe coding and author literally don't know how to code, blame deepseek and chatGPT.
 // @author       Lyla-IDKHOW2CODE
 // @match        https://*/*
@@ -781,7 +781,7 @@
     function 清除高亮() {
         document.querySelectorAll('.coca-word').forEach(el => {
             const parent = el.parentNode;
-            parent.replaceChild(document.createTextNode(el.textContent), el);
+            el.replaceWith(document.createTextNode(el.textContent));
         });
     }
 
@@ -820,9 +820,8 @@
                 return `<span class="coca-word" title="${tooltip} | 双击管理状态" style="${style} border-radius:2px; padding:0 2px; cursor:help;">${match}</span>`;
             });
             if (newHTML !== original) {
-                const wrapper = document.createElement('span');
-                wrapper.innerHTML = newHTML;
-                textNode.parentNode.replaceChild(wrapper, textNode);
+                const fragment = document.createRange().createContextualFragment(newHTML);
+                textNode.parentNode.replaceChild(fragment, textNode);
             }
         }
     }
